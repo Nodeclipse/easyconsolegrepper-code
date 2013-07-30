@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.console.consoleFactories">
+      <consoleFactory
+            class="de.jepfa.easyconsolegrepper.GrepConsoleFactory"
+            icon="icons/Funnel-icon_16.png"
+            label="Easy Console Grepper">
+      </consoleFactory>
+   </extension>
+ <extension
+         point="org.eclipse.ui.console.consolePageParticipants">
+      <consolePageParticipant
+            class="de.jepfa.easyconsolegrepper.participant.GrepConsolePageParticipant"
+            id="de.jepfa.easyconsolegrepper.GrepConsolePageParticipant">
+         <enablement>
+            <instanceof
+                value="de.jepfa.easyconsolegrepper.GrepConsole">
+            </instanceof>
+         </enablement>
+      </consolePageParticipant>
+ </extension>
+ <extension
+         point="org.eclipse.ui.console.consolePageParticipants"> 
+      <consolePageParticipant
+            class="de.jepfa.easyconsolegrepper.participant.TextConsolePageParticipant"
+            id="de.jepfa.easyconsolegrepper.TextConsolePageParticipant">
+         <enablement>
+            <instanceof
+                value="org.eclipse.ui.console.TextConsole">
+            </instanceof>
+         </enablement>
+      </consolePageParticipant>
+   </extension>
+ <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            name="Easy Console Grepper"
+            class="de.jepfa.easyconsolegrepper.preferences.GrepConsolePreferencePage"
+            id="de.jepfa.easyconsolegrepper.preferences.GrepConsolePreferencePage">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="de.jepfa.easyconsolegrepper.preferences.GrepConsolePreferenceInitializer">
+      </initializer>
+   </extension>
+   
+</plugin>
