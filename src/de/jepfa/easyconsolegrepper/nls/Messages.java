@@ -15,6 +15,7 @@ public class Messages extends NLS {
 	public static String ConsoleConfigDialog_NoTextSourceConsoleSelected;
 	public static String ConsoleConfigDialog_NotMatching;
 	public static String ConsoleConfigDialog_RegularExpression;
+	public static String ConsoleConfigDialog_RemoveEntries;
 	public static String ConsoleConfigDialog_SourceConsole;
 	public static String ConsoleConfigHandler_CloseDisposedSourceConsoleQuestion;
 	public static String ConsoleConfigHandler_NoTextConsolesFound;
@@ -36,6 +37,8 @@ public class Messages extends NLS {
 	public static String RegrepSourceInputAction_RegrepCompleteSource;
 	public static String RegrepSourceInputAction_RegrepCompleteSourceTooltip;
 	public static String TextConsolePageParticipant_ResumingConsoleGrepping;
+	public static String ViewGrepPrefsAction_Show_Prefs;
+	public static String ViewGrepPrefsAction_Tooltip_Show_Prefs;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

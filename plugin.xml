@@ -48,5 +48,11 @@
             class="de.jepfa.easyconsolegrepper.preferences.GrepConsolePreferenceInitializer">
       </initializer>
    </extension>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="de.jepfa.easyconsolegrepper.GrepConsoleStartup">
+      </startup>
+   </extension>
    
 </plugin>

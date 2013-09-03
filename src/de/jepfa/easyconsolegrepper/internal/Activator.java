@@ -10,6 +10,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
+import de.jepfa.easyconsolegrepper.model.ECGContext;
 import de.jepfa.easyconsolegrepper.nls.Messages;
 
 /**
@@ -32,6 +33,7 @@ public class Activator extends AbstractUIPlugin {
     public static final String IMAGE_GREP_CONSOLE_24 = "image.grepconsole.24"; //$NON-NLS-1$
     public static final String IMAGE_GREP_CONSOLE_32 = "image.grepconsole.32"; //$NON-NLS-1$
     public static final String IMAGE_REGREPP_16 = "image.regrepp.16"; //$NON-NLS-1$
+    public static final String IMAGE_PENCIL_16 = "image.pencil.16"; //$NON-NLS-1$
     
     public static final String GREP_CONSOLE_NAME = Messages.Activator_PRODUCT_NAME;
 	public static final String GREP_CONSOLE_OUTPUT_PREFIX = "(" + GREP_CONSOLE_NAME + ")"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -53,6 +55,8 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		
+		ECGContext.load();
 	}
 
 	/*
@@ -60,8 +64,11 @@ public class Activator extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
+		ECGContext.persist();
+		
 		plugin = null;
 		super.stop(context);
+		
 	}
 
 	/**
@@ -82,6 +89,7 @@ public class Activator extends AbstractUIPlugin {
         createAndRegisterImage(registry, IMAGE_GREP_CONSOLE_24, "icons/Funnel-icon_24.png"); //$NON-NLS-1$
         createAndRegisterImage(registry, IMAGE_GREP_CONSOLE_32, "icons/Funnel-icon_32.png"); //$NON-NLS-1$
         createAndRegisterImage(registry, IMAGE_REGREPP_16, "icons/nav_refresh_16.png"); //$NON-NLS-1$
+        createAndRegisterImage(registry, IMAGE_PENCIL_16, "icons/pencil_16.png"); //$NON-NLS-1$
     }
 	 
 	 private void createAndRegisterImage(

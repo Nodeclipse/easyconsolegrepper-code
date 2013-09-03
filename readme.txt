@@ -9,6 +9,8 @@ Features:
  * Store filter settings for each GrepConsole
  * Resume filtering after a console has been disposed and is started again (beta state, works fine for Java Consoles) 
  * Re-filter on demand
+ * Show marked line numbers since line number difference is greater than one
+ * Store SearchStrings also when Eclipse is restarted (right click to "Containing Text"-Label clears the list)
 
 License:
   EPL

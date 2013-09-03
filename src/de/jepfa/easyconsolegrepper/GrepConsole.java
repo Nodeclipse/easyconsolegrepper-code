@@ -34,9 +34,11 @@ import de.jepfa.easyconsolegrepper.nls.Messages;
  */
 public class GrepConsole extends IOConsole implements IDocumentListener {
 
-	private static final Color MATCH_BACKGROUND = new Color(null, 200, 200, 200);
-	private static final Color MATCH_FOREGROUND = new Color(null, 0, 0, 0);
+	private static final int SOURCE_CONSOLE_NAME_LENGTH = 40;
+	private static final Color MATCH_BACKGROUND = Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
+	private static final Color MATCH_FOREGROUND = Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
 	private static final Color LINE_NUMBER_FOREGROUND = Display.getCurrent().getSystemColor(SWT.COLOR_DARK_CYAN);
+	private static final Color LINE_NUMBER_FOREGROUND_DARKER =  new Color(null, 0, 100, 100);
 
 	/**
 	 * Key = lini offset
@@ -53,6 +55,7 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
 	private ECGModel ecgModel;
 	private int subsequentLineCounter = getSubsequentLines();
 	private boolean oldMatching = false;
+	private int prevLineNumber;
 
 	public GrepConsole(ECGModel ecgModel) {
 		super(Activator.GREP_CONSOLE_NAME, Activator.getImageDescriptor(Activator.IMAGE_GREP_CONSOLE_16));
@@ -142,8 +145,8 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
 
 		// Set the name to include our grep expression and the source console
 		String sourceName = ecgModel.getSource().getName();
-		if (sourceName.length() > 20) {
-			sourceName = sourceName.substring(0, 17) + "..."; //$NON-NLS-1$
+		if (sourceName.length() > SOURCE_CONSOLE_NAME_LENGTH) {
+			sourceName = sourceName.substring(0, SOURCE_CONSOLE_NAME_LENGTH - 3) + "..."; //$NON-NLS-1$
 		}
 		String disposeString = ""; //$NON-NLS-1$
 		if (ecgModel.isSourceDisposed()) {
@@ -200,9 +203,16 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
 				if (lineNumberLength != -1) {
 					String possibleLineNumber = lineText.substring(0, lineNumberLength);
 					try {
-						Integer.parseInt(possibleLineNumber);
-						styles.add(new StyleRange(lineOffset, lineNumberLength + 1, LINE_NUMBER_FOREGROUND, null,
-								SWT.ITALIC));
+						int lineNumber = Integer.parseInt(possibleLineNumber);
+						if (lineNumber - prevLineNumber > 1) {
+							styles.add(new StyleRange(lineOffset, lineNumberLength + 1, LINE_NUMBER_FOREGROUND_DARKER, null,
+									SWT.ITALIC | SWT.BOLD));
+						}
+						else {
+							styles.add(new StyleRange(lineOffset, lineNumberLength + 1, LINE_NUMBER_FOREGROUND, null,
+									SWT.ITALIC));
+						}
+						prevLineNumber = lineNumber;
 					} catch (NumberFormatException e) {
 						// don't color non-numbers
 					}
@@ -247,12 +257,19 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
 			returnValue = !returnValue;
 		}
 
+		// reset count because there is a match
+		if (returnValue == true) {
+			subsequentLineCounter = getSubsequentLines();
+		}
+
 		if (oldMatching && subsequentLineCounter > 0) {
-			subsequentLineCounter--;
+			// decrease pre number count because there is no match
+			if (returnValue == false) {
+				subsequentLineCounter--;
+			}
 			return true;
 		}
 		oldMatching = returnValue;
-		subsequentLineCounter = getSubsequentLines();
 
 		return returnValue;
 	}

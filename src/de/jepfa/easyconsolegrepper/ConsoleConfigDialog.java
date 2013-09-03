@@ -9,6 +9,8 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -16,6 +18,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.TextConsole;
@@ -98,6 +102,17 @@ public class ConsoleConfigDialog extends Dialog {
 			containingText.setItems(ECGContext.getSearchStringHistory().toArray(
 					new String[ECGContext.getSearchStringHistory().size()]));
 		}
+		Menu menu = new Menu(composite);
+		MenuItem menuItem = new MenuItem(menu, SWT.NONE);
+		menuItem.setText(Messages.ConsoleConfigDialog_RemoveEntries);
+		menuItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ECGContext.getSearchStringHistory().clear();
+				containingText.setItems(new String[0]);
+			}
+		});
+		lblContainingText.setMenu(menu);
 
 		btnCaseSensitive = new Button(composite, SWT.CHECK);
 		btnCaseSensitive.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
@@ -126,7 +141,7 @@ public class ConsoleConfigDialog extends Dialog {
 			consoleList.setEnabled(false);
 			consoleList.add(ecgModel.getSource().getName());
 			getShell().setText(Activator.GREP_CONSOLE_NAME + ": " + ecgModel.getSource().getName()); //$NON-NLS-1$
-			lblHint.setText(Messages.ConsoleConfigDialog_EditCurrentConsole + " " + ecgModel.getSource().getName() + "."); //$NON-NLS-2$ //$NON-NLS-3$
+			lblHint.setText(Messages.ConsoleConfigDialog_EditCurrentConsole + " " + ecgModel.getSource().getName() + ".");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 			containingText.setFocus();
 		}
 		

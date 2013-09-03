@@ -15,6 +15,7 @@ import de.jepfa.easyconsolegrepper.GrepConsole;
 import de.jepfa.easyconsolegrepper.GrepConsoleStyleListener;
 import de.jepfa.easyconsolegrepper.actions.ChangeSettingsAction;
 import de.jepfa.easyconsolegrepper.actions.RegrepSourceInputAction;
+import de.jepfa.easyconsolegrepper.actions.ViewGrepPrefsAction;
 import de.jepfa.easyconsolegrepper.model.ECGContext;
 
 /**
@@ -40,6 +41,7 @@ public class GrepConsolePageParticipant implements IConsolePageParticipant {
 		}
 	};
 	private StyledText viewer;
+	private ViewGrepPrefsAction viewGrepPrefsAction;
 
 	public void init(IPageBookViewPage page, IConsole console) {
 		this.grepConsole = (GrepConsole) console;
@@ -58,6 +60,10 @@ public class GrepConsolePageParticipant implements IConsolePageParticipant {
 		regrepSourceInputAction = new RegrepSourceInputAction(console);
 		manager.appendToGroup(IConsoleConstants.OUTPUT_GROUP,
 				regrepSourceInputAction);
+		// create Prefs tool button
+		viewGrepPrefsAction = new ViewGrepPrefsAction();
+		manager.appendToGroup(IConsoleConstants.OUTPUT_GROUP,
+				viewGrepPrefsAction);
 		
 		if ((page.getControl() instanceof StyledText)) {
 	      viewer = (StyledText)page.getControl();

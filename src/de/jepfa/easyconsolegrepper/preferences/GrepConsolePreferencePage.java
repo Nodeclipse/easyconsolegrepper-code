@@ -11,21 +11,23 @@ import de.jepfa.easyconsolegrepper.nls.Messages;
 
 public class GrepConsolePreferencePage  extends FieldEditorPreferencePage
 	implements IWorkbenchPreferencePage {
+	
+	public static final String PREF_PAGE_ID ="de.jepfa.easyconsolegrepper.preferences.GrepConsolePreferencePage";
 
-public GrepConsolePreferencePage() {
-        super(GRID);
-        setPreferenceStore(Activator.getDefault().getPreferenceStore());
-        setDescription(Messages.GrepConsolePreferencePage_ConfigureTheBehaviorOfXX + Activator.GREP_CONSOLE_NAME);
-}
-
-public void createFieldEditors() {
-	addField(new BooleanFieldEditor(Activator.PREF_SHOW_LINE_OFFSET, Messages.GrepConsolePreferencePage_ShowSourceLine, getFieldEditorParent()));
-	addField(new BooleanFieldEditor(Activator.PREF_HIGHLIGHT_MATCHES, Messages.GrepConsolePreferencePage_HighlightMatches, getFieldEditorParent()));
-    addField(new BooleanFieldEditor(Activator.PREF_RESUME_TERMINATED_CONSOLE, Messages.GrepConsolePreferencePage_ResumeAfterDisposed, getFieldEditorParent()));
-    addField(new BooleanFieldEditor(Activator.PREF_ACTIVATE_CONSOLE_ON_RESUMING, Messages.GrepConsolePreferencePage_ActivateAfterResuming, getFieldEditorParent()));
-    addField(new IntegerFieldEditor(Activator.PREF_SUBSEQUENT_LINES, Messages.GrepConsolePreferencePage_CountOfSubsequentLines, getFieldEditorParent()));
-}
-
-public void init(IWorkbench workbench) {
-}
+	public GrepConsolePreferencePage() {
+	        super(GRID);
+	        setPreferenceStore(Activator.getDefault().getPreferenceStore());
+	        setDescription(Messages.GrepConsolePreferencePage_ConfigureTheBehaviorOfXX + Activator.GREP_CONSOLE_NAME);
+	}
+	
+	public void createFieldEditors() {
+		addField(new BooleanFieldEditor(Activator.PREF_SHOW_LINE_OFFSET, Messages.GrepConsolePreferencePage_ShowSourceLine, getFieldEditorParent()));
+		addField(new BooleanFieldEditor(Activator.PREF_HIGHLIGHT_MATCHES, Messages.GrepConsolePreferencePage_HighlightMatches, getFieldEditorParent()));
+	    addField(new BooleanFieldEditor(Activator.PREF_RESUME_TERMINATED_CONSOLE, Messages.GrepConsolePreferencePage_ResumeAfterDisposed, getFieldEditorParent()));
+	    addField(new BooleanFieldEditor(Activator.PREF_ACTIVATE_CONSOLE_ON_RESUMING, Messages.GrepConsolePreferencePage_ActivateAfterResuming, getFieldEditorParent()));
+	    addField(new IntegerFieldEditor(Activator.PREF_SUBSEQUENT_LINES, Messages.GrepConsolePreferencePage_CountOfSubsequentLines, getFieldEditorParent()));
+	}
+	
+	public void init(IWorkbench workbench) {
+	}
 }
