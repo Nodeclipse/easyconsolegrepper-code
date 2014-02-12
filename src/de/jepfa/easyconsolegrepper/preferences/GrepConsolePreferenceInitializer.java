@@ -21,6 +21,7 @@ public class GrepConsolePreferenceInitializer extends
             store.setDefault(Activator.PREF_SHOW_LINE_OFFSET, true);
             store.setDefault(Activator.PREF_HIGHLIGHT_MATCHES, true);
             store.setDefault(Activator.PREF_SUBSEQUENT_LINES, 0);
+            store.setDefault(Activator.PREF_CONSOLE_WAS_SILENT_FOR, 0);
           
     }
 

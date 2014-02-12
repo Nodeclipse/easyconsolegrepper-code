@@ -4,17 +4,21 @@ import org.eclipse.ui.console.TextConsole;
 
 /**
  * Bean for one Grep Console.
- * 
+ *
  * @author Jens Pfahl
  */
-public class ECGModel {
+public class ECGModel implements Cloneable {
 
 	private TextConsole source;
 	private String searchString = ""; //$NON-NLS-1$
+	private String searchEndString = ""; //$NON-NLS-1$
 	private String sourceName = ""; //$NON-NLS-1$
 	private boolean caseSensitive = false;
 	private boolean regularExpression = false;
 	private boolean notMatching = false;
+	private boolean wholeWord = false;
+	private boolean lineMatching = false;
+	private boolean filterEnabled = true;
 	private boolean sourceDisposed = false;
 
 
@@ -33,6 +37,15 @@ public class ECGModel {
 
 	public void setSearchString(String searchString) {
 		this.searchString = searchString;
+	}
+
+
+	public String getSearchEndString() {
+		return searchEndString;
+	}
+
+	public void setSearchEndString(String searchEndString) {
+		this.searchEndString = searchEndString;
 	}
 
 	public boolean isCaseSensitive() {
@@ -74,6 +87,39 @@ public class ECGModel {
 	public void setNotMatching(boolean notMatching) {
 		this.notMatching = notMatching;
 	}
-	
+
+	public boolean isWholeWord() {
+		return wholeWord;
+	}
+
+	public void setWholeWord(boolean wholeWord) {
+		this.wholeWord = wholeWord;
+	}
+
+	public boolean isFilterEnabled() {
+		return filterEnabled;
+	}
+
+	public void setFilterEnabled(boolean enabled) {
+		this.filterEnabled = enabled;
+	}
+
+	public boolean isLineMatching() {
+		return lineMatching;
+	}
+
+	public void setLineMatching(boolean lineMatching) {
+		this.lineMatching = lineMatching;
+	}
+
+	@Override
+	public ECGModel clone() {
+		try {
+			return (ECGModel) super.clone();
+		} catch (CloneNotSupportedException e) {
+			// cannot occure
+			throw new InternalError();
+		}
+	}
 
 }

@@ -15,13 +15,14 @@ import de.jepfa.easyconsolegrepper.GrepConsole;
 import de.jepfa.easyconsolegrepper.GrepConsoleStyleListener;
 import de.jepfa.easyconsolegrepper.actions.ChangeSettingsAction;
 import de.jepfa.easyconsolegrepper.actions.RegrepSourceInputAction;
+import de.jepfa.easyconsolegrepper.actions.SwitchFilterOnOffAction;
 import de.jepfa.easyconsolegrepper.actions.ViewGrepPrefsAction;
 import de.jepfa.easyconsolegrepper.model.ECGContext;
 
 /**
  * This class is responsible for creating Grep Console tool buttons and the life
  * cycle behavoir of the Grep Console page.
- * 
+ *
  * @author Jens Pfahl
  */
 public class GrepConsolePageParticipant implements IConsolePageParticipant {
@@ -32,7 +33,7 @@ public class GrepConsolePageParticipant implements IConsolePageParticipant {
 	private GrepConsole grepConsole;
 	private GrepConsoleStyleListener styleListener;
 	private IPropertyChangeListener propertyChangeListener = new IPropertyChangeListener() {
-		
+
 		@Override
 		public void propertyChange(PropertyChangeEvent event) {
 			if (event.getProperty().equals(IBasicPropertyConstants.P_TEXT )) {
@@ -42,6 +43,7 @@ public class GrepConsolePageParticipant implements IConsolePageParticipant {
 	};
 	private StyledText viewer;
 	private ViewGrepPrefsAction viewGrepPrefsAction;
+	private SwitchFilterOnOffAction switchFilterOnOffAction;
 
 	public void init(IPageBookViewPage page, IConsole console) {
 		this.grepConsole = (GrepConsole) console;
@@ -56,22 +58,30 @@ public class GrepConsolePageParticipant implements IConsolePageParticipant {
 		changeSettingsAction = new ChangeSettingsAction(console);
 		manager.appendToGroup(IConsoleConstants.OUTPUT_GROUP,
 				changeSettingsAction);
+
 		// create Regrep tool button
 		regrepSourceInputAction = new RegrepSourceInputAction(console);
 		manager.appendToGroup(IConsoleConstants.OUTPUT_GROUP,
 				regrepSourceInputAction);
+
+		// create Regrep tool button
+		switchFilterOnOffAction = new SwitchFilterOnOffAction(console);
+		manager.appendToGroup(IConsoleConstants.OUTPUT_GROUP,
+				switchFilterOnOffAction);
+		switchFilterOnOffAction.setChecked(true);
+
 		// create Prefs tool button
 		viewGrepPrefsAction = new ViewGrepPrefsAction();
 		manager.appendToGroup(IConsoleConstants.OUTPUT_GROUP,
 				viewGrepPrefsAction);
-		
+
 		if ((page.getControl() instanceof StyledText)) {
 	      viewer = (StyledText)page.getControl();
 	      styleListener = new GrepConsoleStyleListener(grepConsole, viewer);
 	      viewer.addLineStyleListener(styleListener);
 	    }
-		
-		
+
+
 		grepConsole.getModel().getSource().addPropertyChangeListener(propertyChangeListener);
 	}
 

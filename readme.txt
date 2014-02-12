@@ -1,5 +1,5 @@
-Easy Console Grepper 
-  Copyright (c) 2013 Jens Pfahl
+Easy Console Grepper
+  Copyright (c) 2013, 2014 Jens Pfahl
 
 
 Features:
@@ -7,22 +7,25 @@ Features:
  * Highlighting of all matches
  * Show subsequent lines after matched lines
  * Store filter settings for each GrepConsole
- * Resume filtering after a console has been disposed and is started again (beta state, works fine for Java Consoles) 
+ * Resume filtering after a console has been disposed and is started again (beta state, works fine for Java Consoles)
  * Re-filter on demand
  * Show marked line numbers since line number difference is greater than one
  * Store SearchStrings also when Eclipse is restarted (right click to "Containing Text"-Label clears the list)
+ * Show marker string when source console was silent for configured seconds (useful for debugging)
+ * enable/disable filter per click
+ * filter / search ranges of lines
 
 License:
   EPL
-  
+
 
 3rd-Party Licenses:
 
 Funnel-Icons were taken from http://www.iconfinder.com/icondetails/61494/128/30_filter_icon
 Icons modified by color
-License: 
+License:
   Free for commercial use (Do not redistribute) (http://www.iconeden.com/icon/free/get/fresh-addon-a-free-iconset)
-Designer: 
+Designer:
   IconEden - http://www.iconeden.com
 Refresh-Icon was from http://eclipse-icons.i24.cc/ovr16/nav_refresh.gif
 License: EPL
@@ -32,7 +35,7 @@ Some code lines are copied and adapted from:
     License: MIT License (http://code.google.com/a/eclipselabs.org/p/console-grep/)
   The GrepClipse project: http://grepclipse.sourceforge.net/
     License: GNU Lesser General Public License - v 2.1 (http://grepclipse.sourceforge.net/license.html)
-    
-    
+
+
 Thank you!
 

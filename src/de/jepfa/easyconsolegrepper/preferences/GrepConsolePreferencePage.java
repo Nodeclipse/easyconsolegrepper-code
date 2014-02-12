@@ -12,7 +12,7 @@ import de.jepfa.easyconsolegrepper.nls.Messages;
 public class GrepConsolePreferencePage  extends FieldEditorPreferencePage
 	implements IWorkbenchPreferencePage {
 	
-	public static final String PREF_PAGE_ID ="de.jepfa.easyconsolegrepper.preferences.GrepConsolePreferencePage";
+	public static final String PREF_PAGE_ID ="de.jepfa.easyconsolegrepper.preferences.GrepConsolePreferencePage"; //$NON-NLS-1$
 
 	public GrepConsolePreferencePage() {
 	        super(GRID);
@@ -25,6 +25,7 @@ public class GrepConsolePreferencePage  extends FieldEditorPreferencePage
 		addField(new BooleanFieldEditor(Activator.PREF_HIGHLIGHT_MATCHES, Messages.GrepConsolePreferencePage_HighlightMatches, getFieldEditorParent()));
 	    addField(new BooleanFieldEditor(Activator.PREF_RESUME_TERMINATED_CONSOLE, Messages.GrepConsolePreferencePage_ResumeAfterDisposed, getFieldEditorParent()));
 	    addField(new BooleanFieldEditor(Activator.PREF_ACTIVATE_CONSOLE_ON_RESUMING, Messages.GrepConsolePreferencePage_ActivateAfterResuming, getFieldEditorParent()));
+	    addField(new IntegerFieldEditor(Activator.PREF_CONSOLE_WAS_SILENT_FOR, Messages.GrepConsolePreferencePage_TimeSecondsAfterConsoleSilence, getFieldEditorParent()));
 	    addField(new IntegerFieldEditor(Activator.PREF_SUBSEQUENT_LINES, Messages.GrepConsolePreferencePage_CountOfSubsequentLines, getFieldEditorParent()));
 	}
 	

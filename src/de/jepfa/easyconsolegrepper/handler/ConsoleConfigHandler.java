@@ -22,11 +22,11 @@ import de.jepfa.easyconsolegrepper.nls.Messages;
 
 /**
  * Handler for opening {@link ConsoleConfigDialog}.
- * 
+ *
  * @author Jens Pfahl
  */
 public class ConsoleConfigHandler extends AbstractHandler {
-	
+
 	public static final String CMD_ID = "de.jepfa.easyconsolegrepper.handler.ConsoleConfigHandler"; //$NON-NLS-1$
 
 
@@ -38,23 +38,23 @@ public class ConsoleConfigHandler extends AbstractHandler {
 
 	public void run() {
 		Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-		
+
 		IConsole[] consoles = ConsolePlugin.getDefault().getConsoleManager().getConsoles();
 		if (consoles.length == 0) {
 			MessageDialog.openError(shell, Activator.GREP_CONSOLE_NAME, Messages.ConsoleConfigHandler_NoTextConsolesFound);
 			return;
 		}
-		
+
 		IConsole activeConsole = GrepConsoleFactory.getActiveConsole();
-		
+
 		if (activeConsole instanceof GrepConsole) {
 			GrepConsole grepConsole = (GrepConsole)activeConsole;
 			ECGModel ecgModel = ECGContext.getECGMap().get(grepConsole);
-			
+
 			Assert.isNotNull(ecgModel);
 
 			if (ecgModel.isSourceDisposed()) {
-				boolean closeConsoleGrep = MessageDialog.openQuestion(shell, Activator.GREP_CONSOLE_NAME, 
+				boolean closeConsoleGrep = MessageDialog.openQuestion(shell, Activator.GREP_CONSOLE_NAME,
 						Messages.ConsoleConfigHandler_CloseDisposedSourceConsoleQuestion);
 				if (closeConsoleGrep) {
 					ConsolePlugin.getDefault().getConsoleManager().removeConsoles(new IConsole[]{grepConsole});
@@ -62,8 +62,8 @@ public class ConsoleConfigHandler extends AbstractHandler {
 					return;
 				}
 			}
-			
-			
+
+
 			ConsoleConfigDialog consoleConfigDialog = new ConsoleConfigDialog(
 					shell, ecgModel, false, consoles);
 			int returnCode = consoleConfigDialog.open();
@@ -71,17 +71,17 @@ public class ConsoleConfigHandler extends AbstractHandler {
 				// reset dispose state
 				ecgModel.setSourceDisposed(false);
 				// Update model
-				ECGContext.getECGMap().put(grepConsole, ecgModel);
+				ECGContext.getECGMap().put(grepConsole, consoleConfigDialog.getModel());
 				// Update Grep Console
-				grepConsole.updateModel(ecgModel);
+				grepConsole.updateModel(consoleConfigDialog.getModel());
 			}
 
-			
+
 		}
 		else {
 			ECGModel ecgModel = new ECGModel();
-			
-			if (activeConsole != null 
+
+			if (activeConsole != null
 					&& activeConsole instanceof TextConsole
 					&& !(activeConsole instanceof GrepConsole)) {
 				ecgModel.setSource((TextConsole)activeConsole);
@@ -94,10 +94,10 @@ public class ConsoleConfigHandler extends AbstractHandler {
 			int returnCode = consoleConfigDialog.open();
 			if (returnCode == IDialogConstants.OK_ID) {
 				GrepConsoleFactory.createNewGrepConsole(consoleConfigDialog.getModel());
-			}			
+			}
 		}
 	}
-	
-	
+
+
 
 }

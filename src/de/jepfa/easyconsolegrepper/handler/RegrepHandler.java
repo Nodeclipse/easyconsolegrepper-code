@@ -43,6 +43,8 @@ public class RegrepHandler extends AbstractHandler {
 		Assert.isTrue(activeConsole instanceof GrepConsole);
 		GrepConsole grepConsole = (GrepConsole)activeConsole;
 		
+		grepConsole.reset();
+		
 		ECGModel ecgModel = ECGContext.getECGMap().get(grepConsole);
 		Assert.isNotNull(ecgModel);
 		

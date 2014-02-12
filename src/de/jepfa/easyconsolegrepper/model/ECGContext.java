@@ -23,7 +23,7 @@ import de.jepfa.easyconsolegrepper.internal.Activator;
  */
 public class ECGContext {
 	
-	private static final String SEARCH_STRING_HISTORY_KEY = "PREF_HISTORY_ENTRIES";
+	private static final String SEARCH_STRING_HISTORY_KEY = "PREF_HISTORY_ENTRIES"; //$NON-NLS-1$
 	
 	
 
@@ -60,7 +60,7 @@ public class ECGContext {
 
 	private static Collection<String> getStringAsList(String string) throws DecoderException {
 		List<String> returnList = new ArrayList<String>();
-		String[] split = string.split(",");
+		String[] split = string.split(","); //$NON-NLS-1$
 		Hex hex = new Hex();
 		for (String encodedString : split) {
 			byte[] decoded = (byte[]) hex.decode(encodedString);
@@ -75,7 +75,7 @@ public class ECGContext {
 		Hex hex = new Hex();
 		for (String string : collection) {
 			String encodedString = new String((char[])hex.encode(string));
-			sb.append(encodedString).append(",");
+			sb.append(encodedString).append(","); //$NON-NLS-1$
 		}
 		return sb.toString();
 	}
