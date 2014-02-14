@@ -35,7 +35,10 @@ import de.jepfa.easyconsolegrepper.nls.Messages;
  */
 public class GrepConsole extends IOConsole implements IDocumentListener {
 
-    private enum RangeMatchingState {IN_RANGE, END_REACHED, NOT_IN_RANGE, END_POINT};
+	private boolean endReached = false;
+    private enum RangeMatchingState {IN_RANGE, END_REACHED, NOT_IN_RANGE, END_MATCH};
+    
+    private static String LINE_NUMBER_SEPARATOR = ": "; //$NON-NLS-1$
 
     private static final int SOURCE_CONSOLE_NAME_LENGTH = 40;
     private static final int SEARCH_STRING_LENGTH = 30;
@@ -160,6 +163,11 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
         if (ecgModel == null) {
             throw new IllegalArgumentException("ecgModel must not be null"); //$NON-NLS-1$
         }
+
+        // a new source console switches of dispose mode, because only not disposed consoles can be selected
+        if (this.ecgModel != null && this.ecgModel.getSource() != ecgModel.getSource()) {
+        	ecgModel.setSourceDisposed(false);
+        }
         this.ecgModel = ecgModel;
 
         // Set the name to include our grep expression and the source console
@@ -170,7 +178,7 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
         }
         String searchString = cut(ecgModel.getSearchString(), SEARCH_STRING_LENGTH);
         String searchEndString = cut(ecgModel.getSearchEndString(), SEARCH_STRING_LENGTH);
-        setName(disposeString + Activator.GREP_CONSOLE_NAME + ": " //$NON-NLS-1$
+        setName(disposeString + Activator.GREP_CONSOLE_NAME + LINE_NUMBER_SEPARATOR 
                 + Messages.GrepConsole_Watching + " [" + sourceName + "] "  //$NON-NLS-1$//$NON-NLS-2$
                 + (ecgModel.isNotMatching() ? Messages.GrepConsole_NotMatching : Messages.GrepConsole_Matching) + " \"" + searchString + "\"" //$NON-NLS-1$ //$NON-NLS-2$
                 + (ecgModel.isLineMatching() ? " --> \"" + searchEndString + "\"" : "") //$NON-NLS-1$ //$NON-NLS-2$
@@ -239,7 +247,7 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
         } else {
             int lineNumberLength = 0;
             if (showLineOffset) {
-                lineNumberLength = lineText.indexOf(": "); //$NON-NLS-1$
+                lineNumberLength = lineText.indexOf(LINE_NUMBER_SEPARATOR);
                 if (lineNumberLength != -1) {
                     String possibleLineNumber = lineText.substring(0, lineNumberLength);
                     try {
@@ -259,7 +267,8 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
                 }
             }
             if (highlightMatched) {
-                setMatchHighlighting(styles, lineText, lineOffset, lineNumberLength + 1);
+                setMatchHighlighting(styles, lineText, lineOffset, 
+                		(showLineOffset ? lineNumberLength + LINE_NUMBER_SEPARATOR.length() : 0));
             }
         }
 
@@ -281,27 +290,50 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
         boolean returnValue = false;
 
         if (ecgModel.isLineMatching()) {
-            // reset previous state
-            if (rangeMatchingState == RangeMatchingState.END_REACHED) {
-                rangeMatchingState = RangeMatchingState.NOT_IN_RANGE;
-            }
-            // check for start match
-            if (grepPattern.matcher(compareLine).find()) {
-                rangeMatchingState = RangeMatchingState.IN_RANGE;
-            }
-            // check for end match
-            if (grepPatternEnd.matcher(compareLine).find()) {
-            	if (rangeMatchingState == RangeMatchingState.IN_RANGE) {
-            		rangeMatchingState = RangeMatchingState.END_REACHED;
-            	}
+
+        	// correct previous state
+        	if (rangeMatchingState == RangeMatchingState.END_REACHED) {
+        		rangeMatchingState = RangeMatchingState.NOT_IN_RANGE;
+        	}
+            
+            // check for empty start match
+            if (isPatternEmpty(grepPattern)) { 
+            	// start from invinity
+            	if (endReached) {
+                    rangeMatchingState = RangeMatchingState.NOT_IN_RANGE;
+                }
             	else {
-            		rangeMatchingState = RangeMatchingState.END_POINT;
+            		rangeMatchingState = RangeMatchingState.IN_RANGE;
             	}
-            	returnValue = true; // zwischenzeilen
+            }
+            else {
+            	// check for start match
+            	if (grepPattern.matcher(compareLine).find()) {
+            		rangeMatchingState = RangeMatchingState.IN_RANGE;
+            	}
+            }
+
+            // check for end match
+            if (isPatternEmpty(grepPatternEnd)) {
+            	// end to invinity
+            }
+            else {
+	            if (grepPatternEnd.matcher(compareLine).find()) {
+	            	if (isPatternEmpty(grepPattern)) {
+	            		endReached = true;
+	            	}
+	            	if (rangeMatchingState == RangeMatchingState.IN_RANGE) {
+	            		rangeMatchingState = RangeMatchingState.END_REACHED;
+	            	}
+	            	else {
+	            		rangeMatchingState = RangeMatchingState.END_MATCH;
+	            	}
+	            	returnValue = true; 
+	            }
             }
             // from start match until end match inclusive end reached, return true!
             if (rangeMatchingState == RangeMatchingState.IN_RANGE) {
-                returnValue = true; // zwischenzeilen
+                returnValue = true; 
             }
         }
         else {
@@ -332,7 +364,7 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
         return returnValue;
     }
 
-    private void setMatchHighlighting(List<StyleRange> styles, String compareLine, int lineOffset, int lineNumberLength) {
+    private void setMatchHighlighting(List<StyleRange> styles, String compareLine, int lineOffset, int prefixLength) {
 
         ECGModel ecgModel = getModel();
 
@@ -348,34 +380,37 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
         if (ecgModel.isLineMatching()) {
             // block
             if (rangeMatchingState == RangeMatchingState.IN_RANGE || rangeMatchingState == RangeMatchingState.END_REACHED) {
-                styles.add(new StyleRange(lineOffset + lineNumberLength, compareLine.length() - lineNumberLength,
+                styles.add(new StyleRange(lineOffset + prefixLength, compareLine.length() - prefixLength,
                         MATCH_FOREGROUND2, MATCH_BACKGROUND2, SWT.NONE));
                 blockDrawn = true;
             }
 
             // starting point
-            Matcher matcher = grepPattern.matcher(compareLine.substring(lineNumberLength));
-            while (matcher.find()) {
-            	styles.add(new StyleRange(lineOffset + lineNumberLength + matcher.start(), 
-            			Math.max(0, matcher.end() - matcher.start() -(blockDrawn ? 1: 0)), MATCH_FOREGROUND, MATCH_BACKGROUND, SWT.NONE));
+            if (!isPatternEmpty(grepPattern)) {
+            	Matcher matcher = grepPattern.matcher(compareLine.substring(prefixLength));
+	            while (matcher.find()) {
+	            	styles.add(new StyleRange(lineOffset + prefixLength + matcher.start(),
+	            			Math.max(0, matcher.end() - matcher.start() -(blockDrawn ? 1: 0)), MATCH_FOREGROUND, MATCH_BACKGROUND, SWT.NONE));
+	            }
             }
             // end point
-            if (rangeMatchingState == RangeMatchingState.END_REACHED || rangeMatchingState == RangeMatchingState.END_POINT) {
-                matcher = grepPatternEnd.matcher(compareLine.substring(lineNumberLength));
+            if (!isPatternEmpty(grepPatternEnd) &&
+            		(rangeMatchingState == RangeMatchingState.END_REACHED || rangeMatchingState == RangeMatchingState.END_MATCH)) {
+                Matcher matcher = grepPatternEnd.matcher(compareLine.substring(prefixLength));
                 while (matcher.find()) {
-                    styles.add(new StyleRange(lineOffset + lineNumberLength + matcher.start(), 
+                    styles.add(new StyleRange(lineOffset + prefixLength + matcher.start(),
                     		Math.max(0, matcher.end() - matcher.start() -(blockDrawn ? 1: 0)), MATCH_FOREGROUND, MATCH_BACKGROUND, SWT.NONE)); // -1 is cause of an eclipse bug
                 }
             }
         }
         else {
         	// single match
-        	Matcher matcher = grepPattern.matcher(compareLine.substring(lineNumberLength));
+        	Matcher matcher = grepPattern.matcher(compareLine.substring(prefixLength));
         	while (matcher.find()) {
-        		styles.add(new StyleRange(lineOffset + lineNumberLength + matcher.start(), matcher.end()
+        		styles.add(new StyleRange(lineOffset + prefixLength + matcher.start(), matcher.end()
         				- matcher.start(), MATCH_FOREGROUND, MATCH_BACKGROUND, SWT.NONE));
         	}
-        	
+
         }
 
 
@@ -387,7 +422,7 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
                 .getBoolean(Activator.PREF_SHOW_LINE_OFFSET);
 
         if (showLineOffset) {
-            line = lineNumber + ": " + line; //$NON-NLS-1$
+            line = lineNumber + LINE_NUMBER_SEPARATOR + line;
         }
         writeToConsole(line);
     }
@@ -407,9 +442,20 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
 
         super.dispose();
     }
-    
-    public void reset() {
+
+    public void resetRange() {
     	rangeMatchingState = RangeMatchingState.NOT_IN_RANGE;
+    	endReached = false;
+
+    }
+    
+    private boolean isPatternEmpty(Pattern pattern) {
+    	String patternString = pattern.pattern();
+    	if (!ecgModel.isRegularExpression()) {
+    		return patternString.equals(Pattern.quote("")); //$NON-NLS-1$
+    	}
+    	
+    	return patternString.isEmpty();
     }
 
     private String cut(String s, int count) {

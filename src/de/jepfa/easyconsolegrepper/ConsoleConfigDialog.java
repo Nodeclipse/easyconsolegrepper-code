@@ -145,12 +145,6 @@ public class ConsoleConfigDialog extends Dialog {
 		btnSetEndMarker = new Button(composite, SWT.CHECK);
 		btnSetEndMarker.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
 		btnSetEndMarker.setText(Messages.ConsoleConfigDialog_LineMatching);
-//		btnSetEndMarker.addSelectionListener(new SelectionAdapter() {
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				updateLineMatchingArrangement(composite, gd_endText);
-//			}
-//		});
 
 		btnCaseSensitive = new Button(composite, SWT.CHECK);
 		btnCaseSensitive.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
