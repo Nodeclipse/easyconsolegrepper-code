@@ -297,7 +297,7 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
         	}
             
             // check for empty start match
-            if (isPatternEmpty(grepPattern)) { 
+            if (ecgModel.getSearchString().isEmpty()) { 
             	// start from invinity
             	if (endReached) {
                     rangeMatchingState = RangeMatchingState.NOT_IN_RANGE;
@@ -314,12 +314,12 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
             }
 
             // check for end match
-            if (isPatternEmpty(grepPatternEnd)) {
+            if (ecgModel.getSearchEndString().isEmpty()) {
             	// end to invinity
             }
             else {
 	            if (grepPatternEnd.matcher(compareLine).find()) {
-	            	if (isPatternEmpty(grepPattern)) {
+	            	if (ecgModel.getSearchString().isEmpty()) {
 	            		endReached = true;
 	            	}
 	            	if (rangeMatchingState == RangeMatchingState.IN_RANGE) {
@@ -386,7 +386,7 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
             }
 
             // starting point
-            if (!isPatternEmpty(grepPattern)) {
+            if (!ecgModel.getSearchString().isEmpty()) {
             	Matcher matcher = grepPattern.matcher(compareLine.substring(prefixLength));
 	            while (matcher.find()) {
 	            	styles.add(new StyleRange(lineOffset + prefixLength + matcher.start(),
@@ -394,7 +394,7 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
 	            }
             }
             // end point
-            if (!isPatternEmpty(grepPatternEnd) &&
+            if (!ecgModel.getSearchEndString().isEmpty() &&
             		(rangeMatchingState == RangeMatchingState.END_REACHED || rangeMatchingState == RangeMatchingState.END_MATCH)) {
                 Matcher matcher = grepPatternEnd.matcher(compareLine.substring(prefixLength));
                 while (matcher.find()) {
@@ -449,15 +449,7 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
 
     }
     
-    private boolean isPatternEmpty(Pattern pattern) {
-    	String patternString = pattern.pattern();
-    	if (!ecgModel.isRegularExpression()) {
-    		return patternString.equals(Pattern.quote("")); //$NON-NLS-1$
-    	}
-    	
-    	return patternString.isEmpty();
-    }
-
+   
     private String cut(String s, int count) {
     	if (s.length() > count) {
             return s.substring(0, count - 3) + "..."; //$NON-NLS-1$
