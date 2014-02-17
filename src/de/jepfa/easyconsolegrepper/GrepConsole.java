@@ -37,7 +37,7 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
 
 	private boolean endReached = false;
     private enum RangeMatchingState {IN_RANGE, END_REACHED, NOT_IN_RANGE, END_MATCH};
-    
+
     private static String LINE_NUMBER_SEPARATOR = ": "; //$NON-NLS-1$
 
     private static final int SOURCE_CONSOLE_NAME_LENGTH = 40;
@@ -176,12 +176,11 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
         if (ecgModel.isSourceDisposed()) {
             disposeString = "*" + Messages.GrepConsole_SourceConsoleDisposed + "* "; //$NON-NLS-1$ //$NON-NLS-2$
         }
-        String searchString = cut(ecgModel.getSearchString(), SEARCH_STRING_LENGTH);
-        String searchEndString = cut(ecgModel.getSearchEndString(), SEARCH_STRING_LENGTH);
-        setName(disposeString + Activator.GREP_CONSOLE_NAME + LINE_NUMBER_SEPARATOR 
+        setName(disposeString + Activator.GREP_CONSOLE_NAME + LINE_NUMBER_SEPARATOR
                 + Messages.GrepConsole_Watching + " [" + sourceName + "] "  //$NON-NLS-1$//$NON-NLS-2$
-                + (ecgModel.isNotMatching() ? Messages.GrepConsole_NotMatching : Messages.GrepConsole_Matching) + " \"" + searchString + "\"" //$NON-NLS-1$ //$NON-NLS-2$
-                + (ecgModel.isLineMatching() ? " --> \"" + searchEndString + "\"" : "") //$NON-NLS-1$ //$NON-NLS-2$
+                + (ecgModel.isNotMatching() ? Messages.GrepConsole_NotMatching : Messages.GrepConsole_Matching) + " \"" //$NON-NLS-1$
+                + cut(ecgModel.getSearchString(), SEARCH_STRING_LENGTH) + "\"" //$NON-NLS-1$ //$NON-NLS-2$
+                + (ecgModel.isLineMatching() ? " --> \"" + cut(ecgModel.getSearchEndString(), SEARCH_STRING_LENGTH) + "\"" : "") //$NON-NLS-1$ //$NON-NLS-2$
                 + " (" + (ecgModel.isCaseSensitive() ? Messages.GrepConsole_CaseSensitive : Messages.GrepConsole_IgnoreCase) + " " //$NON-NLS-1$ //$NON-NLS-2$
                 + (ecgModel.isRegularExpression() ? Messages.GrepConsole_AsGrepExp : Messages.GrepConsole_AsString) + "" //$NON-NLS-1$
                 + (ecgModel.isWholeWord() ? " whole word" : "") + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -192,9 +191,9 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
             paramInput = Pattern.CASE_INSENSITIVE;
         }
 
-        String endString = null;
+        String searchString = ecgModel.getSearchString();
+        String endString = ecgModel.getSearchEndString();
         if (ecgModel.isLineMatching()) {
-            endString = ecgModel.getSearchEndString();
             rangeMatchingState = RangeMatchingState.NOT_IN_RANGE;
         }
 
@@ -267,7 +266,7 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
                 }
             }
             if (highlightMatched) {
-                setMatchHighlighting(styles, lineText, lineOffset, 
+                setMatchHighlighting(styles, lineText, lineOffset,
                 		(showLineOffset ? lineNumberLength + LINE_NUMBER_SEPARATOR.length() : 0));
             }
         }
@@ -295,9 +294,9 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
         	if (rangeMatchingState == RangeMatchingState.END_REACHED) {
         		rangeMatchingState = RangeMatchingState.NOT_IN_RANGE;
         	}
-            
+
             // check for empty start match
-            if (ecgModel.getSearchString().isEmpty()) { 
+            if (ecgModel.getSearchString().isEmpty()) {
             	// start from invinity
             	if (endReached) {
                     rangeMatchingState = RangeMatchingState.NOT_IN_RANGE;
@@ -328,12 +327,12 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
 	            	else {
 	            		rangeMatchingState = RangeMatchingState.END_MATCH;
 	            	}
-	            	returnValue = true; 
+	            	returnValue = true;
 	            }
             }
             // from start match until end match inclusive end reached, return true!
             if (rangeMatchingState == RangeMatchingState.IN_RANGE) {
-                returnValue = true; 
+                returnValue = true;
             }
         }
         else {
@@ -448,8 +447,8 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
     	endReached = false;
 
     }
-    
-   
+
+
     private String cut(String s, int count) {
     	if (s.length() > count) {
             return s.substring(0, count - 3) + "..."; //$NON-NLS-1$

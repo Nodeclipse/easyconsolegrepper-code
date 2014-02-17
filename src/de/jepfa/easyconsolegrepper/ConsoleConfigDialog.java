@@ -39,6 +39,9 @@ import de.jepfa.easyconsolegrepper.nls.Messages;
  * @author Jens Pfahl
  */
 public class ConsoleConfigDialog extends Dialog {
+
+	private static final int MAX_SEARCH_STRING_LENGTH = 400;
+
 	private ECGModel ecgModel = null;
 
 	private Label lblHint;
@@ -116,11 +119,13 @@ public class ConsoleConfigDialog extends Dialog {
 			public void widgetSelected(SelectionEvent e) {
 				ECGContext.getSearchStringHistory().clear();
 				containingText.setItems(new String[0]);
+				containingEndText.setItems(new String[0]);
 			}
 		});
 		lblContainingText.setMenu(menu);
 		lblContainingEndText = new Label(composite, SWT.NONE);
 		lblContainingEndText.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
+		lblContainingEndText.setMenu(menu);
 		new Label(composite, SWT.NONE);
 
 		containingText = new CCombo(composite, SWT.BORDER);
@@ -131,6 +136,7 @@ public class ConsoleConfigDialog extends Dialog {
 			containingText.setItems(ECGContext.getSearchStringHistory().toArray(
 					new String[ECGContext.getSearchStringHistory().size()]));
 		}
+		containingText.setTextLimit(MAX_SEARCH_STRING_LENGTH);
 
 		containingEndText = new CCombo(composite, SWT.BORDER);
 		gd_endText = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
@@ -140,7 +146,9 @@ public class ConsoleConfigDialog extends Dialog {
 			containingEndText.setItems(ECGContext.getSearchStringHistory().toArray(
 					new String[ECGContext.getSearchStringHistory().size()]));
 		}
+		containingEndText.setTextLimit(MAX_SEARCH_STRING_LENGTH);
 		containingEndText.setVisible(false);
+
 
 		btnSetEndMarker = new Button(composite, SWT.CHECK);
 		btnSetEndMarker.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
