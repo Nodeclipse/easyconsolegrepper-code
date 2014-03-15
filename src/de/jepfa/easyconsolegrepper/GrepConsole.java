@@ -9,12 +9,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleOutputStream;
@@ -42,12 +45,7 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
 
     private static final int SOURCE_CONSOLE_NAME_LENGTH = 40;
     private static final int SEARCH_STRING_LENGTH = 30;
-    private static final Color MATCH_BACKGROUND = Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
-    private static final Color MATCH_BACKGROUND2 = new Color(null, 230, 250, 255);
-    private static final Color MATCH_FOREGROUND = Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
-    private static final Color MATCH_FOREGROUND2 = Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE);
-    private static final Color LINE_NUMBER_FOREGROUND = Display.getCurrent().getSystemColor(SWT.COLOR_DARK_CYAN);
-    private static final Color LINE_NUMBER_FOREGROUND_DARKER = new Color(null, 0, 100, 100);
+
 
     /**
      * Key = line offset
@@ -174,13 +172,13 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
         String sourceName = cut(ecgModel.getSource().getName(), SOURCE_CONSOLE_NAME_LENGTH);
         String disposeString = ""; //$NON-NLS-1$
         if (ecgModel.isSourceDisposed()) {
-            disposeString = "*" + Messages.GrepConsole_SourceConsoleDisposed + "* "; //$NON-NLS-1$ //$NON-NLS-2$
+            disposeString = Messages.GrepConsole_SourceConsoleDisposed;
         }
         setName(disposeString + Activator.GREP_CONSOLE_NAME + LINE_NUMBER_SEPARATOR
                 + Messages.GrepConsole_Watching + " [" + sourceName + "] "  //$NON-NLS-1$//$NON-NLS-2$
                 + (ecgModel.isNotMatching() ? Messages.GrepConsole_NotMatching : Messages.GrepConsole_Matching) + " \"" //$NON-NLS-1$
                 + cut(ecgModel.getSearchString(), SEARCH_STRING_LENGTH) + "\"" //$NON-NLS-1$ //$NON-NLS-2$
-                + (ecgModel.isLineMatching() ? " --> \"" + cut(ecgModel.getSearchEndString(), SEARCH_STRING_LENGTH) + "\"" : "") //$NON-NLS-1$ //$NON-NLS-2$
+                + (ecgModel.isRangeMatching() ? " --> \"" + cut(ecgModel.getSearchEndString(), SEARCH_STRING_LENGTH) + "\"" : "") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
                 + " (" + (ecgModel.isCaseSensitive() ? Messages.GrepConsole_CaseSensitive : Messages.GrepConsole_IgnoreCase) + " " //$NON-NLS-1$ //$NON-NLS-2$
                 + (ecgModel.isRegularExpression() ? Messages.GrepConsole_AsGrepExp : Messages.GrepConsole_AsString) + "" //$NON-NLS-1$
                 + (ecgModel.isWholeWord() ? " whole word" : "") + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -193,26 +191,26 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
 
         String searchString = ecgModel.getSearchString();
         String endString = ecgModel.getSearchEndString();
-        if (ecgModel.isLineMatching()) {
+        if (ecgModel.isRangeMatching()) {
             rangeMatchingState = RangeMatchingState.NOT_IN_RANGE;
         }
 
 
         if (!ecgModel.isRegularExpression()) {
             searchString = Pattern.quote(searchString);
-            if (ecgModel.isLineMatching()) {
+            if (ecgModel.isRangeMatching()) {
                 endString = Pattern.quote(endString);
 
             }
         }
         if (ecgModel.isWholeWord()) {
             searchString = "\\b" + searchString + "\\b"; //$NON-NLS-1$ //$NON-NLS-2$
-            if (ecgModel.isLineMatching()) {
+            if (ecgModel.isRangeMatching()) {
                 endString = "\\b" + endString + "\\b"; //$NON-NLS-1$ //$NON-NLS-2$
             }
         }
         grepPattern = Pattern.compile(searchString, paramInput);
-        if (ecgModel.isLineMatching()) {
+        if (ecgModel.isRangeMatching()) {
             grepPatternEnd = Pattern.compile(endString, paramInput);
         }
 
@@ -242,9 +240,13 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
 
         List<StyleRange> styles = new ArrayList<StyleRange>();
         if (lineText.startsWith(Activator.GREP_CONSOLE_OUTPUT_PREFIX)) {
-            styles.add(new StyleRange(lineOffset, lineText.length(), LINE_NUMBER_FOREGROUND, null, SWT.ITALIC));
+            styles.add(new StyleRange(lineOffset, lineText.length(),
+            		getColor(Activator.PREF_COLOR_LINE_NUMBER_FOREGROUND),
+            		null, SWT.ITALIC));
         } else {
             int lineNumberLength = 0;
+            Color lineNumberForegrund = getColor(Activator.PREF_COLOR_LINE_NUMBER_FOREGROUND);
+            int lineNumberStyle = SWT.ITALIC;
             if (showLineOffset) {
                 lineNumberLength = lineText.indexOf(LINE_NUMBER_SEPARATOR);
                 if (lineNumberLength != -1) {
@@ -252,13 +254,12 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
                     try {
                         int lineNumber = Integer.parseInt(possibleLineNumber);
                         if (lineNumber - prevLineNumber > 1 || lineNumber - prevLineNumber < 0) {
-                            styles.add(new StyleRange(lineOffset, lineNumberLength + 1, LINE_NUMBER_FOREGROUND_DARKER, null,
-                                    SWT.ITALIC | SWT.BOLD));
+                        	lineNumberForegrund = getColor(Activator.PREF_COLOR_LINE_NUMBER_FOREGROUND_DARKER);
+                        	lineNumberStyle = SWT.ITALIC | SWT.BOLD;
                         }
-                        else {
-                            styles.add(new StyleRange(lineOffset, lineNumberLength + 1, LINE_NUMBER_FOREGROUND, null,
-                                    SWT.ITALIC));
-                        }
+
+                        styles.add(new StyleRange(lineOffset, lineNumberLength + 1, lineNumberForegrund, null, lineNumberStyle));
+
                         prevLineNumber = lineNumber;
                     } catch (NumberFormatException e) {
                         // don't color non-numbers
@@ -266,8 +267,13 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
                 }
             }
             if (highlightMatched) {
-                setMatchHighlighting(styles, lineText, lineOffset,
+                boolean matchDrawn = setMatchHighlighting(styles, lineText, lineOffset,
                 		(showLineOffset ? lineNumberLength + LINE_NUMBER_SEPARATOR.length() : 0));
+
+                if (!matchDrawn && showLineOffset && highlightMatched) {
+                	styles.add(new StyleRange(lineOffset, lineNumberLength,
+                			getColor(Activator.PREF_COLOR_LINE_NUMBER_FOREGROUND_LIGHTER), null, lineNumberStyle));
+                }
             }
         }
 
@@ -288,7 +294,7 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
 
         boolean returnValue = false;
 
-        if (ecgModel.isLineMatching()) {
+        if (ecgModel.isRangeMatching()) {
 
         	// correct previous state
         	if (rangeMatchingState == RangeMatchingState.END_REACHED) {
@@ -363,7 +369,7 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
         return returnValue;
     }
 
-    private void setMatchHighlighting(List<StyleRange> styles, String compareLine, int lineOffset, int prefixLength) {
+    private boolean setMatchHighlighting(List<StyleRange> styles, String compareLine, int lineOffset, int prefixLength) {
 
         ECGModel ecgModel = getModel();
 
@@ -376,11 +382,13 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
 
 
         boolean blockDrawn = false; // to avoid a StyleRange - bug
-        if (ecgModel.isLineMatching()) {
+        boolean matchDrawn = false;
+        if (ecgModel.isRangeMatching()) {
             // block
             if (rangeMatchingState == RangeMatchingState.IN_RANGE || rangeMatchingState == RangeMatchingState.END_REACHED) {
                 styles.add(new StyleRange(lineOffset + prefixLength, compareLine.length() - prefixLength,
-                        MATCH_FOREGROUND2, MATCH_BACKGROUND2, SWT.NONE));
+                		getColor(Activator.PREF_COLOR_MATCH_FOREGROUND_RANGE),
+                		getColor(Activator.PREF_COLOR_MATCH_BACKGROUND_RANGE), SWT.NONE));
                 blockDrawn = true;
             }
 
@@ -389,7 +397,10 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
             	Matcher matcher = grepPattern.matcher(compareLine.substring(prefixLength));
 	            while (matcher.find()) {
 	            	styles.add(new StyleRange(lineOffset + prefixLength + matcher.start(),
-	            			Math.max(0, matcher.end() - matcher.start() -(blockDrawn ? 1: 0)), MATCH_FOREGROUND, MATCH_BACKGROUND, SWT.NONE));
+	            			Math.max(0, matcher.end() - matcher.start() -(blockDrawn ? 1: 0)),
+	            			getColor(Activator.PREF_COLOR_MATCH_FOREGROUND),
+	            			getColor(Activator.PREF_COLOR_MATCH_BACKGROUND), SWT.NONE));
+	            	matchDrawn = true;
 	            }
             }
             // end point
@@ -398,7 +409,10 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
                 Matcher matcher = grepPatternEnd.matcher(compareLine.substring(prefixLength));
                 while (matcher.find()) {
                     styles.add(new StyleRange(lineOffset + prefixLength + matcher.start(),
-                    		Math.max(0, matcher.end() - matcher.start() -(blockDrawn ? 1: 0)), MATCH_FOREGROUND, MATCH_BACKGROUND, SWT.NONE)); // -1 is cause of an eclipse bug
+                    		Math.max(0, matcher.end() - matcher.start() -(blockDrawn ? 1: 0)),
+                    		getColor(Activator.PREF_COLOR_MATCH_FOREGROUND),
+                    		getColor(Activator.PREF_COLOR_MATCH_BACKGROUND), SWT.NONE)); // -1 is cause of an eclipse bug
+                    matchDrawn = true;
                 }
             }
         }
@@ -406,12 +420,15 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
         	// single match
         	Matcher matcher = grepPattern.matcher(compareLine.substring(prefixLength));
         	while (matcher.find()) {
-        		styles.add(new StyleRange(lineOffset + prefixLength + matcher.start(), matcher.end()
-        				- matcher.start(), MATCH_FOREGROUND, MATCH_BACKGROUND, SWT.NONE));
+        		styles.add(new StyleRange(lineOffset + prefixLength + matcher.start(), matcher.end() - matcher.start(),
+        				getColor(Activator.PREF_COLOR_MATCH_FOREGROUND),
+        				getColor(Activator.PREF_COLOR_MATCH_BACKGROUND), SWT.NONE));
+        		matchDrawn = true;
         	}
 
         }
 
+       return matchDrawn | blockDrawn;
 
     }
 
@@ -446,6 +463,19 @@ public class GrepConsole extends IOConsole implements IDocumentListener {
     	rangeMatchingState = RangeMatchingState.NOT_IN_RANGE;
     	endReached = false;
 
+    }
+
+    private Color getColor(String name) {
+    	RGB rgb = PreferenceConverter.getColor(Activator.getDefault().getPreferenceStore(), name);
+
+    	final String rgbKey = Activator.GREP_CONSOLE_NAME + "_" + rgb.toString() ; //$NON-NLS-1$
+		Color color = JFaceResources.getColorRegistry().get(rgbKey);
+		if (color == null || color.isDisposed()) {
+			JFaceResources.getColorRegistry().put(rgbKey, rgb);
+			color = JFaceResources.getColorRegistry().get(rgbKey);
+		}
+
+		return color;
     }
 
 

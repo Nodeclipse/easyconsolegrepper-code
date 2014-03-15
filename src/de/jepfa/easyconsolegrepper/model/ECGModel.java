@@ -17,7 +17,7 @@ public class ECGModel implements Cloneable {
 	private boolean regularExpression = false;
 	private boolean notMatching = false;
 	private boolean wholeWord = false;
-	private boolean lineMatching = false;
+	private boolean rangeMatching = false;
 	private boolean filterEnabled = true;
 	private boolean sourceDisposed = false;
 
@@ -104,12 +104,12 @@ public class ECGModel implements Cloneable {
 		this.filterEnabled = enabled;
 	}
 
-	public boolean isLineMatching() {
-		return lineMatching;
+	public boolean isRangeMatching() {
+		return rangeMatching;
 	}
 
-	public void setLineMatching(boolean lineMatching) {
-		this.lineMatching = lineMatching;
+	public void setRangeMatching(boolean rangeMatching) {
+		this.rangeMatching = rangeMatching;
 	}
 
 	@Override

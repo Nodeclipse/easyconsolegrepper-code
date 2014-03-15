@@ -1,0 +1,47 @@
+
+################################################################################
+# 1.8.0
+################################################################################
+ * customize match colors
+ * don't ask again option for disposed source consoles
+ * change source console during grep session
+ * change filter settings after source console has been disposed
+ * Store and show SearchStrings in order of use
+
+
+
+################################################################################
+# 1.7.2
+################################################################################
+ * search strings / regexp with more than length 27 fixed
+
+
+
+################################################################################
+# 1.7.1
+################################################################################
+ * range matching with hole word option fixed
+
+
+
+################################################################################
+# 1.7.0
+################################################################################
+ * filter / search ranges of lines
+ * enable/disable filter per click
+ * Show marker string when source console was silent for configured seconds (useful for debugging)
+ * some bugfixes
+
+
+
+################################################################################
+# 1.6.0
+################################################################################
+ * Filter fixed strings or RegExp matches from any TextConsoles
+ * Highlighting of all matches
+ * Show subsequent lines after matched lines
+ * Store filter settings for each GrepConsole
+ * Resume filtering after a console has been disposed and is started again (beta state, works fine for Java Consoles)
+ * Re-filter on demand
+ * Show marked line numbers since line number difference is greater than one
+ * Store SearchStrings also when Eclipse is restarted (right click to "Containing Text"-Label clears the list)

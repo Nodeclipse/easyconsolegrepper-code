@@ -18,24 +18,24 @@ import de.jepfa.easyconsolegrepper.internal.Activator;
 
 /**
  * This class holds all used Grep Consoles and the Substitution String history.
- * 
+ *
  * @author Jens Pfahl
  */
 public class ECGContext {
-	
+
 	private static final String SEARCH_STRING_HISTORY_KEY = "PREF_HISTORY_ENTRIES"; //$NON-NLS-1$
-	
-	
+
+	private static final int MAX_SEARCH_STRING_HISTORY_LENGTH = 100;
 
 	private static Map<GrepConsole, ECGModel> ecgMap = new ConcurrentHashMap<GrepConsole, ECGModel>();
-	
-	private static Set<String> searchStringHistory = Collections.synchronizedSet(new TreeSet<String>());
+
+	private static Set<SearchStringElem> searchStringHistory = Collections.synchronizedSet(new TreeSet<SearchStringElem>());
 
 	public static Map<GrepConsole, ECGModel> getECGMap() {
 		return ecgMap;
 	}
-	
-	public static Set<String> getSearchStringHistory() {
+
+	public static Set<SearchStringElem> getSortedSearchStringHistory() {
 		return searchStringHistory;
 	}
 
@@ -43,39 +43,49 @@ public class ECGContext {
 		String searchStringHistoryData = Activator.getDefault().getDialogSettings().get(SEARCH_STRING_HISTORY_KEY);
 		if (searchStringHistoryData != null) {
 			try {
-				getSearchStringHistory().addAll(getStringAsList(searchStringHistoryData));
+				searchStringHistory.addAll(getStringAsList(searchStringHistoryData));
 			} catch (DecoderException e) {
 				e.printStackTrace();
 			}
 		}
 	}
-	
+
 	public static void persist() {
 		try {
-			Activator.getDefault().getDialogSettings().put(SEARCH_STRING_HISTORY_KEY, getListAsString(getSearchStringHistory()));
+			Activator.getDefault().getDialogSettings().put(SEARCH_STRING_HISTORY_KEY, getListAsString(searchStringHistory));
 		} catch (EncoderException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private static Collection<String> getStringAsList(String string) throws DecoderException {
-		List<String> returnList = new ArrayList<String>();
+	private static Collection<SearchStringElem> getStringAsList(String string) throws DecoderException {
+		List<SearchStringElem> returnList = new ArrayList<SearchStringElem>();
 		String[] split = string.split(","); //$NON-NLS-1$
 		Hex hex = new Hex();
-		for (String encodedString : split) {
-			byte[] decoded = (byte[]) hex.decode(encodedString);
+		int stamp = split.length;
+		for (String s : split) {
+			stamp--;
+			byte[] decoded = (byte[]) hex.decode(s);
 			String decodedString = new String(decoded);
-			returnList.add(decodedString);
+			returnList.add(new SearchStringElem(stamp, decodedString));
 		}
 		return returnList;
 	}
 
-	private static String getListAsString(Collection<String> collection) throws EncoderException {
+	private static String getListAsString(Collection<SearchStringElem> collection) throws EncoderException {
 		StringBuffer sb = new StringBuffer();
 		Hex hex = new Hex();
-		for (String string : collection) {
-			String encodedString = new String((char[])hex.encode(string));
+		int counter = 0;
+		for (SearchStringElem elem : collection) {
+			if (counter == MAX_SEARCH_STRING_HISTORY_LENGTH) {
+				break;
+			}
+			if (elem.getSearchString().isEmpty()) {
+				continue;
+			}
+			String encodedString = new String((char[])hex.encode(elem.getSearchString()));
 			sb.append(encodedString).append(","); //$NON-NLS-1$
+			counter++;
 		}
 		return sb.toString();
 	}

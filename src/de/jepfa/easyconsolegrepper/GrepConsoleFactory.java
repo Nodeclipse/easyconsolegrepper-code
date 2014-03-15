@@ -18,8 +18,8 @@ import de.jepfa.easyconsolegrepper.model.ECGModel;
 /**
  * Class to create a new {@link GrepConsole}.
  * <p>
- * Parts are copied from  http://code.google.com/a/eclipselabs.org/p/console-grep 
- * 
+ * Parts are copied from  http://code.google.com/a/eclipselabs.org/p/console-grep
+ *
  * @author Jens Pfahl
  */
 @SuppressWarnings("restriction")
@@ -27,7 +27,7 @@ public class GrepConsoleFactory implements IConsoleFactory {
 
 	@Override
 	public void openConsole() {
-		new ConsoleConfigHandler().run();
+		new ConsoleConfigHandler(true).run();
 	}
 
 	public static void createNewGrepConsole(ECGModel ecgModel) {

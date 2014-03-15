@@ -7,7 +7,7 @@
       <consoleFactory
             class="de.jepfa.easyconsolegrepper.GrepConsoleFactory"
             icon="icons/Funnel-icon_16.png"
-            label="Easy Console Grepper">
+            label="New Easy Console Grepper">
       </consoleFactory>
    </extension>
  <extension
@@ -41,11 +41,20 @@
             class="de.jepfa.easyconsolegrepper.preferences.GrepConsolePreferencePage"
             id="de.jepfa.easyconsolegrepper.preferences.GrepConsolePreferencePage">
       </page>
+      <page
+            category="de.jepfa.easyconsolegrepper.preferences.GrepConsolePreferencePage"
+            class="de.jepfa.easyconsolegrepper.preferences.GrepConsoleColorPreferencePage"
+            id="de.jepfa.easyconsolegrepper.preferences.GrepConsoleColorPreferencePage"
+            name="Match and Line Colors">
+      </page>
    </extension>
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
             class="de.jepfa.easyconsolegrepper.preferences.GrepConsolePreferenceInitializer">
+      </initializer>
+      <initializer
+            class="de.jepfa.easyconsolegrepper.preferences.GrepConsoleColorPreferenceInitializer">
       </initializer>
    </extension>
    <extension

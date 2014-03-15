@@ -2,19 +2,6 @@ Easy Console Grepper
   Copyright (c) 2013, 2014 Jens Pfahl
 
 
-Features:
- * Filter fixed strings or RegExp matches from any TextConsoles
- * Highlighting of all matches
- * Show subsequent lines after matched lines
- * Store filter settings for each GrepConsole
- * Resume filtering after a console has been disposed and is started again (beta state, works fine for Java Consoles)
- * Re-filter on demand
- * Show marked line numbers since line number difference is greater than one
- * Store SearchStrings also when Eclipse is restarted (right click to "Containing Text"-Label clears the list)
- * Show marker string when source console was silent for configured seconds (useful for debugging)
- * enable/disable filter per click
- * filter / search ranges of lines
-
 License:
   EPL
 

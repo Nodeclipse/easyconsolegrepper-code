@@ -28,6 +28,15 @@ import de.jepfa.easyconsolegrepper.nls.Messages;
 public class ConsoleConfigHandler extends AbstractHandler {
 
 	public static final String CMD_ID = "de.jepfa.easyconsolegrepper.handler.ConsoleConfigHandler"; //$NON-NLS-1$
+	private boolean forceNew = false;
+
+
+	public ConsoleConfigHandler() {
+	}
+
+	public ConsoleConfigHandler(boolean forceNew) {
+		this.forceNew = forceNew;
+	}
 
 
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -40,27 +49,35 @@ public class ConsoleConfigHandler extends AbstractHandler {
 		Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 
 		IConsole[] consoles = ConsolePlugin.getDefault().getConsoleManager().getConsoles();
-		if (consoles.length == 0) {
+
+		int textConsoleCount = 0;
+		for (IConsole console : consoles) {
+			if ((console instanceof TextConsole) && !(console instanceof GrepConsole)) {
+				textConsoleCount++;
+			}
+		}
+
+		if (forceNew && textConsoleCount == 0) {
 			MessageDialog.openError(shell, Activator.GREP_CONSOLE_NAME, Messages.ConsoleConfigHandler_NoTextConsolesFound);
 			return;
 		}
 
 		IConsole activeConsole = GrepConsoleFactory.getActiveConsole();
 
-		if (activeConsole instanceof GrepConsole) {
+		if (!forceNew && activeConsole instanceof GrepConsole) {
 			GrepConsole grepConsole = (GrepConsole)activeConsole;
 			ECGModel ecgModel = ECGContext.getECGMap().get(grepConsole);
 
 			Assert.isNotNull(ecgModel);
 
-			if (ecgModel.isSourceDisposed()) {
-				boolean closeConsoleGrep = MessageDialog.openQuestion(shell, Activator.GREP_CONSOLE_NAME,
-						Messages.ConsoleConfigHandler_CloseDisposedSourceConsoleQuestion);
-				if (closeConsoleGrep) {
-					ConsolePlugin.getDefault().getConsoleManager().removeConsoles(new IConsole[]{grepConsole});
-					ECGContext.getECGMap().remove(grepConsole);
-					return;
-				}
+			Boolean checkState = HandlerUtil.checkDisposedActionAllowed(shell, ecgModel);
+			if (checkState == null) {
+				return;
+			}
+			if (checkState) {
+				ConsolePlugin.getDefault().getConsoleManager().removeConsoles(new IConsole[]{grepConsole});
+				ECGContext.getECGMap().remove(grepConsole);
+				return;
 			}
 
 

@@ -7,7 +7,7 @@ import de.jepfa.easyconsolegrepper.internal.Activator;
 
 public class GrepConsolePreferenceInitializer extends
 		AbstractPreferenceInitializer {
-	
+
 
 	/*
      * (non-Javadoc)
@@ -20,9 +20,9 @@ public class GrepConsolePreferenceInitializer extends
             store.setDefault(Activator.PREF_ACTIVATE_CONSOLE_ON_RESUMING, false);
             store.setDefault(Activator.PREF_SHOW_LINE_OFFSET, true);
             store.setDefault(Activator.PREF_HIGHLIGHT_MATCHES, true);
+            store.setDefault(Activator.PREF_DONT_SHOW_DISPOSAL_DIALOG, false);
             store.setDefault(Activator.PREF_SUBSEQUENT_LINES, 0);
             store.setDefault(Activator.PREF_CONSOLE_WAS_SILENT_FOR, 0);
-          
     }
 
 

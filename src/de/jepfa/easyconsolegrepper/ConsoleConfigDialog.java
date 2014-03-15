@@ -31,6 +31,7 @@ import de.jepfa.easyconsolegrepper.converter.TextConsole2NameConverter;
 import de.jepfa.easyconsolegrepper.internal.Activator;
 import de.jepfa.easyconsolegrepper.model.ECGContext;
 import de.jepfa.easyconsolegrepper.model.ECGModel;
+import de.jepfa.easyconsolegrepper.model.SearchStringElem;
 import de.jepfa.easyconsolegrepper.nls.Messages;
 
 /**
@@ -64,6 +65,8 @@ public class ConsoleConfigDialog extends Dialog {
 
 	private Composite composite;
 
+	private ECGModel ecgModelOrig;
+
 
 
 
@@ -78,6 +81,7 @@ public class ConsoleConfigDialog extends Dialog {
 	public ConsoleConfigDialog(Shell parentShell, ECGModel ecgModel, boolean createNew, IConsole[] consoles) {
 		super(parentShell);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
+		this.ecgModelOrig = ecgModel;
 		this.ecgModel = ecgModel.clone();
 		this.createNew = createNew;
 		this.consoles = consoles;
@@ -117,7 +121,7 @@ public class ConsoleConfigDialog extends Dialog {
 		menuItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ECGContext.getSearchStringHistory().clear();
+				ECGContext.getSortedSearchStringHistory().clear();
 				containingText.setItems(new String[0]);
 				containingEndText.setItems(new String[0]);
 			}
@@ -132,9 +136,10 @@ public class ConsoleConfigDialog extends Dialog {
 		GridData gd_text = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 		gd_text.widthHint = 393;
 		containingText.setLayoutData(gd_text);
-		if (!ECGContext.getSearchStringHistory().isEmpty()) {
-			containingText.setItems(ECGContext.getSearchStringHistory().toArray(
-					new String[ECGContext.getSearchStringHistory().size()]));
+		if (!ECGContext.getSortedSearchStringHistory().isEmpty()) {
+			for (SearchStringElem elem : ECGContext.getSortedSearchStringHistory()) {
+				containingText.add(elem.getSearchString());
+			}
 		}
 		containingText.setTextLimit(MAX_SEARCH_STRING_LENGTH);
 
@@ -142,9 +147,11 @@ public class ConsoleConfigDialog extends Dialog {
 		gd_endText = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 		gd_endText.widthHint = 0;
 		containingEndText.setLayoutData(gd_endText);
-		if (!ECGContext.getSearchStringHistory().isEmpty()) {
-			containingEndText.setItems(ECGContext.getSearchStringHistory().toArray(
-					new String[ECGContext.getSearchStringHistory().size()]));
+		if (!ECGContext.getSortedSearchStringHistory().isEmpty()) {
+			for (SearchStringElem elem : ECGContext.getSortedSearchStringHistory()) {
+				containingEndText.add(elem.getSearchString());
+			}
+
 		}
 		containingEndText.setTextLimit(MAX_SEARCH_STRING_LENGTH);
 		containingEndText.setVisible(false);
@@ -152,7 +159,7 @@ public class ConsoleConfigDialog extends Dialog {
 
 		btnSetEndMarker = new Button(composite, SWT.CHECK);
 		btnSetEndMarker.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
-		btnSetEndMarker.setText(Messages.ConsoleConfigDialog_LineMatching);
+		btnSetEndMarker.setText(Messages.ConsoleConfigDialog_RangeMatching);
 
 		btnCaseSensitive = new Button(composite, SWT.CHECK);
 		btnCaseSensitive.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
@@ -175,24 +182,30 @@ public class ConsoleConfigDialog extends Dialog {
 
 		new Label(composite, SWT.NONE);
 
-		if (createNew || ecgModel.isSourceDisposed()) {
+		if (createNew ) {
 			loadConsoles();
-			consoleList.setEnabled(true);
+			//consoleList.setEnabled(true);
 			getShell().setText(Activator.GREP_CONSOLE_NAME + ": " + Messages.ConsoleConfigDialog_NewConsole); //$NON-NLS-1$
 			lblHint.setText(Messages.ConsoleConfigDialog_CreateNewGrepConsole);
 			consoleList.setFocus();
 		}
 		else {
-			consoleList.setEnabled(false);
-			consoleList.add(ecgModel.getSource().getName());
+			if (ecgModel.isSourceDisposed()) {
+				// add current because it is no more in the list caused of disposal.
+				consoleList.add(Messages.GrepConsole_SourceConsoleDisposed + ecgModel.getSource().getName());
+			}
+			else {
+				//consoleList.setEnabled(false);
+			}
+			loadConsoles();
 			getShell().setText(Activator.GREP_CONSOLE_NAME + ": " + ecgModel.getSource().getName()); //$NON-NLS-1$
-			lblHint.setText(Messages.ConsoleConfigDialog_EditCurrentConsole + " " + ecgModel.getSource().getName() + ".");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+			lblHint.setText(Messages.ConsoleConfigDialog_EditCurrentConsole);
 			containingText.setFocus();
 		}
 
 		initDataBindings().updateModels();
 
-		updateLineMatchingArrangement();
+		updateRangeMatchingArrangement();
 
 		return composite;
 	}
@@ -215,12 +228,55 @@ public class ConsoleConfigDialog extends Dialog {
 			MessageDialog.openError(getShell(), Activator.GREP_CONSOLE_NAME, Messages.ConsoleConfigDialog_NoTextSourceConsoleSelected);
 		}
 		else {
-			ECGContext.getSearchStringHistory().add(ecgModel.getSearchString());
+			updateSearchHistory(ecgModel.getSearchString());
+			if (ecgModel.isRangeMatching()) {
+				updateSearchHistory(ecgModel.getSearchEndString());
+			}
 			super.okPressed();
 		}
 	}
 
+	private void updateSearchHistory(String s) {
+		if (s.isEmpty()) {
+			return;
+		}
+
+		SearchStringElem foundElem = null;
+		// first check for already containing search strings
+		for (SearchStringElem elem : ECGContext.getSortedSearchStringHistory()) {
+			if (elem.getSearchString().equals(s)) {
+				foundElem = elem;
+				break;
+			}
+		}
+
+		if (foundElem != null) {
+			ECGContext.getSortedSearchStringHistory().remove(foundElem);
+			ECGContext.getSortedSearchStringHistory().add(new SearchStringElem(getNextStamp(), s));
+		}
+		else {
+			// no containing search strings
+			SearchStringElem elem = new SearchStringElem(getNextStamp(), s);
+			ECGContext.getSortedSearchStringHistory().add(elem);
+		}
+
+
+	}
+
+	private int getNextStamp() {
+		for (SearchStringElem elem : ECGContext.getSortedSearchStringHistory()) {
+			int next = Math.max(elem.getStamp() + 1, ECGContext.getSortedSearchStringHistory().size());
+			return next;
+		}
+		return 0;
+	}
+
 	public ECGModel getModel() {
+		// If selected source console is disposed, databinding and its Name2TextConsoleConverter returns null.
+		// Because only the current source console can be the disposed one, we set them.
+		if (ecgModel.getSource() == null) {
+			ecgModel.setSource(ecgModelOrig.getSource());
+		}
 		return ecgModel;
 	}
 	private DataBindingContext initDataBindings() {
@@ -249,6 +305,22 @@ public class ConsoleConfigDialog extends Dialog {
 		UpdateValueStrategy textConsole2NameStrategy = new UpdateValueStrategy();
 		textConsole2NameStrategy.setConverter(new TextConsole2NameConverter());
 		bindingContext.bindValue(consoleListObserveSelectionObserveWidget, ecgModelSourceObserveValue, name2TextConsoleStrategy, textConsole2NameStrategy);
+		// Listener for update dispose-state
+		ecgModelSourceObserveValue.addValueChangeListener(new IValueChangeListener() {
+
+			@Override
+			public void handleValueChange(ValueChangeEvent event) {
+				// when we change back to the origin source console we must set the origin disposal state
+				if (ecgModelOrig.getSource() == ecgModel.getSource()) {
+					ecgModel.setSourceDisposed(ecgModelOrig.isSourceDisposed());
+				}
+				else {
+					ecgModel.setSourceDisposed(false);
+
+				}
+
+			}
+		});
 		//
 		IObservableValue btnNotMatchingObserveSelectionObserveWidget = SWTObservables.observeSelection(btnNotMatching);
 		IObservableValue ecgModelNotMatchingObserveValue = PojoObservables.observeValue(ecgModel, "notMatching"); //$NON-NLS-1$
@@ -259,16 +331,16 @@ public class ConsoleConfigDialog extends Dialog {
 		bindingContext.bindValue(btnWholeWordObserveSelectionObserveWidget, ecgModelWholeWordObserveValue, null, null);
 		//
 		IObservableValue btnSetEndMarkerObserveSelectionObserveWidget = SWTObservables.observeSelection(btnSetEndMarker);
-		IObservableValue ecgModelLineMatchingObserveValue = PojoObservables.observeValue(ecgModel, "lineMatching"); //$NON-NLS-1$
-		bindingContext.bindValue(btnSetEndMarkerObserveSelectionObserveWidget, ecgModelLineMatchingObserveValue, null, null);
+		IObservableValue ecgModelRangeMatchingObserveValue = PojoObservables.observeValue(ecgModel, "rangeMatching"); //$NON-NLS-1$
+		bindingContext.bindValue(btnSetEndMarkerObserveSelectionObserveWidget, ecgModelRangeMatchingObserveValue, null, null);
 		//
 
 		//
-		ecgModelLineMatchingObserveValue.addValueChangeListener(new IValueChangeListener() {
+		ecgModelRangeMatchingObserveValue.addValueChangeListener(new IValueChangeListener() {
 
 			@Override
 			public void handleValueChange(ValueChangeEvent event) {
-				updateLineMatchingArrangement();
+				updateRangeMatchingArrangement();
 			}
 		});
 
@@ -295,7 +367,7 @@ public class ConsoleConfigDialog extends Dialog {
 		lblContainingText.pack();
 	}
 
-	private void updateLineMatchingArrangement() {
+	private void updateRangeMatchingArrangement() {
 		if (btnSetEndMarker.getSelection()) {
 			containingEndText.setVisible(true);
 			gd_endText.widthHint = 393;

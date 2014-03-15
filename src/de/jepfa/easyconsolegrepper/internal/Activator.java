@@ -27,8 +27,17 @@ public class Activator extends AbstractUIPlugin {
 	public static final String PREF_ACTIVATE_CONSOLE_ON_RESUMING = "activate.console.on.resuming"; //$NON-NLS-1$
 	public static final String PREF_SHOW_LINE_OFFSET = "show.line.offset"; //$NON-NLS-1$
 	public static final String PREF_HIGHLIGHT_MATCHES = "highlight.matches"; //$NON-NLS-1$
+	public static final String PREF_DONT_SHOW_DISPOSAL_DIALOG = "dont.show.disposal.dialog"; //$NON-NLS-1$
 	public static final String PREF_SUBSEQUENT_LINES = "subsequent.lines"; //$NON-NLS-1$
 	public static final String PREF_CONSOLE_WAS_SILENT_FOR = "console.was.silent.for"; //$NON-NLS-1$
+
+	public static final String PREF_COLOR_MATCH_FOREGROUND = "color.match.foreground"; //$NON-NLS-1$
+	public static final String PREF_COLOR_MATCH_BACKGROUND = "color.match.background"; //$NON-NLS-1$
+	public static final String PREF_COLOR_MATCH_FOREGROUND_RANGE = "color.match.foreground.range"; //$NON-NLS-1$
+	public static final String PREF_COLOR_MATCH_BACKGROUND_RANGE = "color.match.background.range"; //$NON-NLS-1$
+	public static final String PREF_COLOR_LINE_NUMBER_FOREGROUND = "color.line.number.foreground"; //$NON-NLS-1$
+	public static final String PREF_COLOR_LINE_NUMBER_FOREGROUND_DARKER = "color.line.number.foreground.darker"; //$NON-NLS-1$
+	public static final String PREF_COLOR_LINE_NUMBER_FOREGROUND_LIGHTER = "color.line.number.foreground.lighter"; //$NON-NLS-1$
 
     public static final String IMAGE_GREP_CONSOLE_16 = "image.grepconsole.16"; //$NON-NLS-1$
     public static final String IMAGE_GREP_CONSOLE_24 = "image.grepconsole.24"; //$NON-NLS-1$
