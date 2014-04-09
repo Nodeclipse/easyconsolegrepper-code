@@ -16,7 +16,7 @@ public class GrepConsolePreferenceInitializer extends
      */
     public void initializeDefaultPreferences() {
             IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-            store.setDefault(Activator.PREF_RESUME_TERMINATED_CONSOLE, false);
+            store.setDefault(Activator.PREF_RESUME_TERMINATED_CONSOLE, true);
             store.setDefault(Activator.PREF_ACTIVATE_CONSOLE_ON_RESUMING, false);
             store.setDefault(Activator.PREF_SHOW_LINE_OFFSET, true);
             store.setDefault(Activator.PREF_HIGHLIGHT_MATCHES, true);

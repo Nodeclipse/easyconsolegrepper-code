@@ -194,9 +194,6 @@ public class ConsoleConfigDialog extends Dialog {
 				// add current because it is no more in the list caused of disposal.
 				consoleList.add(Messages.GrepConsole_SourceConsoleDisposed + ecgModel.getSource().getName());
 			}
-			else {
-				//consoleList.setEnabled(false);
-			}
 			loadConsoles();
 			getShell().setText(Activator.GREP_CONSOLE_NAME + ": " + ecgModel.getSource().getName()); //$NON-NLS-1$
 			lblHint.setText(Messages.ConsoleConfigDialog_EditCurrentConsole);
@@ -358,6 +355,9 @@ public class ConsoleConfigDialog extends Dialog {
 	}
 
 	private void updateLblText() {
+		if (btnSetEndMarker != null && btnSetEndMarker.getSelection()) {
+			return;
+		}
 		if (ecgModel.isRegularExpression()) {
 			lblContainingText.setText(Messages.ConsoleConfigDialog_ContainingRegexp);
 		}

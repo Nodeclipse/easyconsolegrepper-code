@@ -1,6 +1,8 @@
 Easy Console Grepper
   Copyright (c) 2013, 2014 Jens Pfahl
 
+Homepage:
+  http://sourceforge.net/projects/easyconsolegrepper/
 
 License:
   EPL
